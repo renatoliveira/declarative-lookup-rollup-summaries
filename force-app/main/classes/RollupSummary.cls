@@ -37,6 +37,7 @@ public class RollupSummary {
 	/**
 	 * Provides access to the wrapped SObject
 	 **/
+	@AuraEnabled
 	public SObject Record {get; private set;}
 
 	/**
