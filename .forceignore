@@ -5,3 +5,9 @@
 package.xml
 **profiles
 **settings
+
+force-app/main/lwc/jsconfig.json
+
+**/jsconfig.json
+
+**/.eslintrc.json
