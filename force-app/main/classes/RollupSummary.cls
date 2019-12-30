@@ -2,22 +2,22 @@
  * Copyright (c), Andrew Fawcett
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, 
+ * Redistribution and use in source and binary forms, with or without modification,
  *   are permitted provided that the following conditions are met:
  *
- * - Redistributions of source code must retain the above copyright notice, 
+ * - Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice, 
- *      this list of conditions and the following disclaimer in the documentation 
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
  *      and/or other materials provided with the distribution.
- * - Neither the name of the Andrew Fawcett, nor the names of its contributors 
- *      may be used to endorse or promote products derived from this software without 
+ * - Neither the name of the Andrew Fawcett, nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
- *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
- *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ *  THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  *  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
@@ -29,13 +29,13 @@
  *   for the tools domain and service layer logic to work regardless of how the rollup summary is stored
  *
  *   TODO: I may implement this in due course differently, to use a small factory pattern and
- *         leverage explicit references to the Custom Object or Custom Metadata fields, likely 
+ *         leverage explicit references to the Custom Object or Custom Metadata fields, likely
  *         faster and also ensures the compiler is aware of the references
  **/
 public class RollupSummary {
 
 	/**
-	 * Provides access to the wrapped SObject 
+	 * Provides access to the wrapped SObject
 	 **/
 	public SObject Record {get; private set;}
 
@@ -57,103 +57,103 @@ public class RollupSummary {
 		this.Fields = new RecordMetadata(this);
 	}
 
-	public String Id { 
-		get { return (String) Record.get('Id'); } 
+	public String Id {
+		get { return (String) Record.get('Id'); }
 	}
 
-	public String Name { 
-		get { return (String) Record.get(Record instanceof LookupRollupSummary__c ? 'Name' : 'Label'); } 
-		set { Record.put('Name', value); } 
+	public String Name {
+		get { return (String) Record.get(Record instanceof LookupRollupSummary__c ? 'Name' : 'Label'); }
+		set { Record.put('Name', value); }
 	}
 
-	public Boolean Active { 
+	public Boolean Active {
 		get { return (Boolean) Record.get('Active__c'); }
-		set { Record.put('Active__c', value); } 
+		set { Record.put('Active__c', value); }
 	}
 
 	public String AggregateOperation {
 		get { return (String) Record.get('AggregateOperation__c'); }
-		set { Record.put('AggregateOperation__c', value); } 
+		set { Record.put('AggregateOperation__c', value); }
 	}
 
 	public String AggregateResultField {
 		get { return (String) Record.get('AggregateResultField__c'); }
-		set { Record.put('AggregateResultField__c', value); } 
+		set { Record.put('AggregateResultField__c', value); }
 	}
 
 	public String CalculationMode {
 		get { return (String) Record.get('CalculationMode__c'); }
-		set { Record.put('CalculationMode__c', value); } 
+		set { Record.put('CalculationMode__c', value); }
 	}
 
 	public String CalculationSharingMode {
 		get { return (String) Record.get('CalculationSharingMode__c'); }
-		set { Record.put('CalculationSharingMode__c', value); } 
+		set { Record.put('CalculationSharingMode__c', value); }
 	}
-	
+
 	public String ChildObject {
 		get { return (String) Record.get('ChildObject__c'); }
-		set { Record.put('ChildObject__c', value); } 
+		set { Record.put('ChildObject__c', value); }
 	}
-	
+
 	public String ConcatenateDelimiter {
 		get { return (String) Record.get('ConcatenateDelimiter__c'); }
-		set { Record.put('ConcatenateDelimiter__c', value); } 
+		set { Record.put('ConcatenateDelimiter__c', value); }
 	}
-	
+
 	public String Description {
 		get { return (String) Record.get('Description__c'); }
-		set { Record.put('Description__c', value); } 
+		set { Record.put('Description__c', value); }
 	}
-	
+
 	public String FieldToAggregate {
 		get { return (String) Record.get('FieldToAggregate__c'); }
-		set { Record.put('FieldToAggregate__c', value); } 
+		set { Record.put('FieldToAggregate__c', value); }
 	}
-	
+
 	public String FieldToOrderBy {
 		get { return (String) Record.get('FieldToOrderBy__c'); }
-		set { Record.put('FieldToOrderBy__c', value); } 
+		set { Record.put('FieldToOrderBy__c', value); }
 	}
-	
+
 	public String UniqueName {
 		get { return (String) Record.get(Record instanceof LookupRollupSummary__c ? 'UniqueName__c' : 'DeveloperName'); }
-		set { Record.put(Record instanceof LookupRollupSummary__c ? 'UniqueName__c' : 'DeveloperName', value); } 
+		set { Record.put(Record instanceof LookupRollupSummary__c ? 'UniqueName__c' : 'DeveloperName', value); }
 	}
-	
+
 	public String ParentObject {
 		get { return (String) Record.get('ParentObject__c'); }
-		set { Record.put('ParentObject__c', value); } 
+		set { Record.put('ParentObject__c', value); }
 	}
-	
+
 	public String RelationshipCriteria {
 		get { return (String) Record.get('RelationshipCriteria__c'); }
-		set { Record.put('RelationshipCriteria__c', value); } 
+		set { Record.put('RelationshipCriteria__c', value); }
 	}
-	
+
 	public String RelationshipCriteriaFields {
 		get { return (String) Record.get('RelationshipCriteriaFields__c'); }
-		set { Record.put('RelationshipCriteriaFields__c', value); } 
+		set { Record.put('RelationshipCriteriaFields__c', value); }
 	}
-	
+
 	public String RelationshipField {
 		get { return (String) Record.get('RelationshipField__c'); }
-		set { Record.put('RelationshipField__c', value); } 
+		set { Record.put('RelationshipField__c', value); }
 	}
-	
+
 	public String TestCode {
 		get { return (String) Record.get(Record instanceof LookupRollupSummary2__mdt ? 'TestCode2__c' : 'TestCode__c'); }
-		set { Record.put(Record instanceof LookupRollupSummary2__mdt ? 'TestCode2__c' : 'TestCode__c', value); } 
+		set { Record.put(Record instanceof LookupRollupSummary2__mdt ? 'TestCode2__c' : 'TestCode__c', value); }
 	}
-	
+
 	public String TestCodeParent {
 		get { if (Record instanceof LookupRollupSummary2__mdt) { return (String) Record.get('TestCodeParent__c'); } else { return null; } }
-		set { if (Record instanceof LookupRollupSummary2__mdt) { Record.put('TestCodeParent__c', value); } } 
+		set { if (Record instanceof LookupRollupSummary2__mdt) { Record.put('TestCodeParent__c', value); } }
 	}
-	
+
 	public Boolean TestCodeSeeAllData {
 		get { return (Boolean) Record.get('TestCodeSeeAllData__c'); }
-		set { Record.put('TestCodeSeeAllData__c', value); } 
+		set { Record.put('TestCodeSeeAllData__c', value); }
 	}
 
 	public Boolean AggregateAllRows {
@@ -274,14 +274,14 @@ public class RollupSummary {
 				fieldLabelInError = LookupRollupSummary__c.AggregateAllRows__c.getDescribe().getLabel();
 			} else if(this === RecordMetadata.RowLimit) {
 				fieldLabelInError = LookupRollupSummary__c.RowLimit__c.getDescribe().getLabel();
-			}				
+			}
 
 			// Store error
-			RecordMetadata.Errors.add(fieldLabelInError + ': ' + errorMessage);			
+			RecordMetadata.Errors.add(fieldLabelInError + ': ' + errorMessage);
 
 			// For Custom Object backed Rollup Summaries utilise SObject.addError
 			if(RecordMetadata.RollupSummary.Record instanceof LookupRollupSummary__c) {
-				LookupRollupSummary__c customObjectRecord = 
+				LookupRollupSummary__c customObjectRecord =
 					(LookupRollupSummary__c) RecordMetadata.RollupSummary.Record;
 				// Route the error accordingly
 				if(this === RecordMetadata.Active) {
@@ -323,10 +323,10 @@ public class RollupSummary {
 					customObjectRecord.AggregateAllRows__c.addError(errorMessage);
 				} else if(this === RecordMetadata.RowLimit) {
 					customObjectRecord.RowLimit__c.addError(errorMessage);
-				}				
+				}
 			}
 		}
-	}	
+	}
 
 	public static List<RollupSummary> toList(List<SObject> records) {
 		List<RollupSummary> summaries = new List<RollupSummary>();
@@ -343,14 +343,14 @@ public class RollupSummary {
 		}
 		return summariesById;
 	}
-	
+
 	/**
 	 * Migrate in memory representation to latest by migrating values from old fields to new ones accordingly
 	 *   (this approach makes code elsewhere in the tool simpler as it only deals with the latest fields)
 	 **/
 	public static SObject migrate(SObject rollup) {
 		// No migrations for legacy Custom Object based rollups presently
-		if(rollup instanceof LookupRollupSummary__c) {						
+		if(rollup instanceof LookupRollupSummary__c) {
 			return rollup;
 		}
 		// Perform various field migrations for Custom Metadata based rollups (done via JSON, since Apex cannot write to MDT fields)
@@ -364,8 +364,8 @@ public class RollupSummary {
 			// Migrate all other fields as-is
 			} else {
 				jsonNew.put(field, jsonParsed.get(field));
-			}			
+			}
 		}
-		return (SObject) JSON.deserializeStrict(JSON.serialize(jsonNew),LookupRollupSummary2__mdt.class);		
-	}	
+		return (SObject) JSON.deserializeStrict(JSON.serialize(jsonNew),LookupRollupSummary2__mdt.class);
+	}
 }
