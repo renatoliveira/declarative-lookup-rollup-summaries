@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "c/managelookuprollupsummary": [
+                "../../../lwc/managelookuprollupsummary/managelookuprollupsummary.js"
+            ],
+            "c/jszip": [
+                "../../../../libs/metadataservice/staticresources/jszip/jszip.js"
+            ]
+        }
+    }
+}

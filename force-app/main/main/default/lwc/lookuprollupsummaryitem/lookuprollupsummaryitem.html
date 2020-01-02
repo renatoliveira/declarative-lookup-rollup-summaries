@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title={record.Label} key={record.Id} icon-name="standard:calibration">
+
+        <lightning-button-icon  icon-name="utility:edit" variant="border-filled" alternative-text="Edit" slot="actions"></lightning-button-icon>
+
+        <div class="slds-m-around_small">
+
+            <div class="slds-m-bottom_small">
+                <p>Rollup set on <span class="slds-text-color_weak">{record.ParentObject__c}</span>, rolling related <span class="slds-text-color_weak">{record.ChildObject__c}</span> records.</p>
+                <p>Aggregate every <span class="slds-text-color_weak">{record.FieldToAggregate__c}</span> field of the <span class="slds-text-color_weak">{record.ChildObject__c}</span> record using the <span class="slds-text-color_weak">"{record.AggregateOperation__c}"</span> operation.</p>
+                <p>Store the result on the <span class="slds-text-color_weak">{record.ParentObject__c}</span>'s field <span class="slds-text-color_weak">{record.AggregateResultField__c}.</span></p>
+            </div>
+
+            <div slot="footer">
+
+                <lightning-badge label={activeLabel}></lightning-badge>
+
+                <template if:true={record.AggregateAllRows__c}>
+                    <lightning-badge label="Aggregate all rows"></lightning-badge>
+                </template>
+
+                <lightning-badge label={criteriaBadge}></lightning-badge>
+
+                <lightning-badge label={record.CalculationMode__c}></lightning-badge>
+
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

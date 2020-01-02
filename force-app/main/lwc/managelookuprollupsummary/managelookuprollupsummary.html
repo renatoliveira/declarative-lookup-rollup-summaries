@@ -2,55 +2,41 @@
     <div class="slds-brand-band slds-brand-band_large">
         <div class="slds-box slds-theme_default">
 
-            <div class="slds-m-top_small slds-m-bottom_small">
-                <lightning-input
-                    name="enter-search"
-                    label="Search rollup"
-                    type="search"
-                    onchange={searchByString}
-                ></lightning-input>
+            <div class="slds-grid">
+                <div class="slds-size_1-of-4">
+                    <div class="slds-m-right_small">
+                        <lightning-vertical-navigation>
+                            <lightning-vertical-navigation-section label="Rollups">
+                                <lightning-vertical-navigation-item-badge label="All" name="all" badge-count={totals}></lightning-vertical-navigation-item-badge>
+                                <lightning-vertical-navigation-item-badge label="Active" name="active" badge-count={active}></lightning-vertical-navigation-item-badge>
+                                <lightning-vertical-navigation-item-badge label="Inactive" name="inactive" badge-count={inactive}></lightning-vertical-navigation-item-badge>
+                                <template for:each={objectCount} for:item="obj">
+                                    <lightning-vertical-navigation-item-badge key={obj.name} label={obj.name} name={obj.name} badge-count={obj.count}></lightning-vertical-navigation-item-badge>
+                                </template>
+                            </lightning-vertical-navigation-section>
+                        </lightning-vertical-navigation>
+                    </div>
+                </div>
+
+                <div class="slds-size_3-of-4">
+
+                    <div class="slds-m-top_small slds-m-bottom_small">
+                        <lightning-input
+                            name="enter-search"
+                            label="Search rollup"
+                            type="search"
+                            placeholder="e.g. 'Won opportunities of accounts'"
+                            onchange={searchByString}
+                        ></lightning-input>
+                    </div>
+
+                    <template for:each={lookups} for:item="lookup">
+                        <c-lookuprollupsummaryitem record={lookup.Record} key={lookup.Record.Id}></c-lookuprollupsummaryitem>
+                    </template>
+
+                </div>
             </div>
 
-            <template for:each={lookups} for:item="lookup">
-                <lightning-card title={lookup.Record.Label} key={lookup.Record.Id} icon-name="standard:calibration">
-                    <div class="slds-m-around_small">
-
-                        <div class="slds-m-bottom_small">
-                            <p>Rollup set on <span class="slds-text-color_weak">{lookup.Record.ParentObject__c}</span>, rolling related <span class="slds-text-color_weak">{lookup.Record.ChildObject__c}</span> records.</p>
-                            <p>Aggregate every <span class="slds-text-color_weak">{lookup.Record.FieldToAggregate__c}</span> field of the <span class="slds-text-color_weak">{lookup.Record.ChildObject__c}</span> record using the <span class="slds-text-color_weak">"{lookup.Record.AggregateOperation__c}"</span> operation.</p>
-                            <p>Store the result on the <span class="slds-text-color_weak">{lookup.Record.ParentObject__c}</span>'s field <span class="slds-text-color_weak">{lookup.Record.AggregateResultField__c}.</span></p>
-                        </div>
-
-                        <div>
-                            <template if:true={lookup.Record.Active__c}>
-                                <lightning-badge label="Is active"></lightning-badge>
-                            </template>
-
-                            <template if:false={lookup.Record.Active__c}>
-                                <lightning-badge label="Inactive"></lightning-badge>
-                            </template>
-
-                            <template if:true={lookup.Record.AggregateAllRows__c}>
-                                <lightning-badge label="Aggregate all rows"></lightning-badge>
-                            </template>
-
-                            <template if:true={lookup.Record.RelationshipCriteria__c}>
-                                <lightning-badge label="Has criteria"></lightning-badge>
-                            </template>
-
-                            <template if:false={lookup.Record.RelationshipCriteria__c}>
-                                <lightning-badge label="Has no criteria"></lightning-badge>
-                            </template>
-
-                            <template if:false={lookup.Record.CalculationMode__c}>
-                                <lightning-badge label="Is real time"></lightning-badge>
-                            </template>
-
-                        </div>
-
-                    </div>
-                </lightning-card>
-            </template>
         </div>
     </div>
 </template>
