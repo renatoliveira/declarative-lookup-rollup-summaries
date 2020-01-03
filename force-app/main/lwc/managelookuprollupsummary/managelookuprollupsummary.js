@@ -8,6 +8,7 @@ export default class Managelookuprollupsummary extends LightningElement {
     @track totals = 0
     @track active = 0
     @track inactive = 0
+    @track loading = true
 
     loadLookups() {
         getLookups().then(res => {
@@ -15,21 +16,12 @@ export default class Managelookuprollupsummary extends LightningElement {
 
             if (res !== undefined && Array.isArray(res)) {
                 this.totals = res.length
-                this.active = res.reduce(el => {
-                    return el.Record.Active__c === true
+                this.active = res.filter(el => {
+                    return el.Record.Active__c
                 }).length
-                this.inactive = res.reduce(el => {
-                    return el.Record.Active__c !== true
+                this.inactive = res.filter(el => {
+                    return !el.Record.Active__c
                 }).length
-
-                let m = new Map()
-
-                res.forEach(el => {
-                    if (!m.has(el.name)) {
-                        m.set(el.name, 0)
-                    }
-                    m.set(el.name, m.get(el.name) + 1)
-                })
             }
         }).catch(err => {
             if (Array.isArray(err)) {
@@ -37,6 +29,8 @@ export default class Managelookuprollupsummary extends LightningElement {
             } else {
                 this.errors = [err]
             }
+        }).finally(() => {
+            this.loading = false
         })
     }
 

@@ -5,9 +5,22 @@
             "c/managelookuprollupsummary": [
                 "../../../lwc/managelookuprollupsummary/managelookuprollupsummary.js"
             ],
+            "c/lookuprollupsummaryitem": [
+                "lookuprollupsummaryitem/lookuprollupsummaryitem.js"
+            ],
             "c/jszip": [
                 "../../../../libs/metadataservice/staticresources/jszip/jszip.js"
             ]
-        }
+        },
+        "experimentalDecorators": true
+    },
+    "include": [
+        "**/*",
+        "../../../../../.sfdx/typings/lwc/**/*.d.ts"
+    ],
+    "typeAcquisition": {
+        "include": [
+            "jest"
+        ]
     }
 }

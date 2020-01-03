@@ -5,6 +5,9 @@
             "c/managelookuprollupsummary": [
                 "managelookuprollupsummary/managelookuprollupsummary.js"
             ],
+            "c/lookuprollupsummaryitem": [
+                "../main/default/lwc/lookuprollupsummaryitem/lookuprollupsummaryitem.js"
+            ],
             "c/jszip": [
                 "../../libs/metadataservice/staticresources/jszip/jszip.js"
             ]

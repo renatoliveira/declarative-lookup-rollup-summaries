@@ -30,8 +30,16 @@
                         ></lightning-input>
                     </div>
 
-                    <template for:each={lookups} for:item="lookup">
-                        <c-lookuprollupsummaryitem record={lookup.Record} key={lookup.Record.Id}></c-lookuprollupsummaryitem>
+                    <template if:true={loading}>
+                        <div class="slds-is-relative">
+                            <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template if:false={loading}>
+                        <template for:each={lookups} for:item="lookup">
+                            <c-lookuprollupsummaryitem record={lookup.Record} key={lookup.Record.Id}></c-lookuprollupsummaryitem>
+                        </template>
                     </template>
 
                 </div>
