@@ -330,6 +330,38 @@ global with sharing class RollupService
 	}
 
 	/**
+	 * Allows the subscriber to check if a specific rollup is bypassed or not.
+	 */
+	global static Boolean isBypassed(String rollupName)
+	{
+		return BypassHandler.isBypassed(rollupName);
+	}
+
+	/**
+	 * Allows the bypass of a rollup, given its unique name.
+	 */
+	global static Boolean bypass(String rollupName)
+	{
+		return BypassHandler.bypass(rollupName);
+	}
+
+	/**
+	 * Clears the bypass of a rollup, given its unique name.
+	 */
+	global static Boolean clearBypass(String rollupName)
+	{
+		return BypassHandler.clearBypass(rollupName);
+	}
+
+	/**
+	 * Clears the bypass of aall rollups.
+	 */
+	global static void clearAllBypasses()
+	{
+		BypassHandler.clearAllBypasses();
+	}
+
+	/**
 	 * Method returns a QueryLocator that returns master records (as per the lookup definition) meeting the criteria expressed (if defined)
 	 **/
 	public static Database.QueryLocator masterRecordsAsQueryLocator(Id lookupId)
@@ -368,10 +400,23 @@ global with sharing class RollupService
 	 **/
 	public static void processScheduleItems(List<LookupRollupSummaryScheduleItems__c> rollupSummaryScheduleItems)
 	{
+		// Legacy dlrs__LookupRollupSummary__c field on LookupRollupSummaryScheduleItems__c present?
+		Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.LookupRollupSummaryScheduleItems__c.fields.getMap();
+		Schema.SObjectField legacyLookupRollupSummaryField = fieldMap.get('dlrs__LookupRollupSummary__c');
+
 		// Load related Lookup summaries for the scheduled items
 		Set<String> lookupIds = new Set<String>();
 		for(LookupRollupSummaryScheduleItems__c scheduleItem : rollupSummaryScheduleItems) {
-			lookupIds.add(scheduleItem.LookupRollupSummary2__c);
+			// It is possible for some really old scheduled items, LookupRollupSummary2__c is null
+			if(scheduleItem.LookupRollupSummary2__c == null) {
+				// If the legacy dlrs__LookupRollupSummary__c still exists in the org, it will have the corresponding lookup
+				if(legacyLookupRollupSummaryField!=null) {
+					lookupIds.add((String) scheduleItem.get(legacyLookupRollupSummaryField));
+				}
+			} else {
+				// Going forward LookupRollupSummary2__c is the official field to indicate the corresponding lookup
+				lookupIds.add(scheduleItem.LookupRollupSummary2__c);
+			}			
 		}
 		Map<String, RollupSummary> lookups =
 			RollupSummary.toMap(new RollupSummariesSelector().selectById(lookupIds));
@@ -381,8 +426,19 @@ global with sharing class RollupService
 		Map<String, Set<Id>> parentIdsByParentType = new Map<String, Set<Id>>();
 		for(LookupRollupSummaryScheduleItems__c scheduleItem : rollupSummaryScheduleItems)
 		{
+			// Resolve lookup associated with this scheduled item
 			Id parentId = scheduleItem.ParentId__c;
-			RollupSummary lookup = lookups.get(scheduleItem.LookupRollupSummary2__c);
+			RollupSummary lookup = null; 
+			if(scheduleItem.LookupRollupSummary2__c == null) {
+				if(legacyLookupRollupSummaryField!=null) {
+					lookup = lookups.get((String)scheduleItem.get(legacyLookupRollupSummaryField));
+				}
+			} else {
+				lookup = lookups.get(scheduleItem.LookupRollupSummary2__c);
+			}			
+			if(lookup==null) {
+				continue;
+			}
 			// The lookup definition could have been changed or due to a historic bug in correctly associated
 			if(parentId.getSobjectType() != gd.get(lookup.ParentObject))
 				continue;
@@ -734,7 +790,7 @@ global with sharing class RollupService
 				Id masterRecordId = null;
 				try {
 					masterRecordId = (Id) existingRecord.get('MasterRecordId');
-				} catch(Exception e) {}				
+				} catch(Exception e) {}
 				if(masterRecordId!=null) {
 					masterRecordIdsFromMerge.add(masterRecordId);
 				}
@@ -777,6 +833,11 @@ global with sharing class RollupService
 			Map<Id, Set<String>> fieldsInvolvedInLookup = new Map<Id, Set<String>>();
 			for(RollupSummary lookup : lookups)
 			{
+				if (BypassHandler.isBypassed(lookup.UniqueName))
+				{
+					continue;
+				}
+
 				Set<String> lookupFields = new Set<String>();
 				lookupFields.add(lookup.FieldToAggregate);
 				if(!String.isBlank(lookup.RelationshipCriteriaFields)) {
@@ -885,6 +946,11 @@ global with sharing class RollupService
 			List<RollupSummary> lookupsToProcess = new List<RollupSummary>();
 			for(RollupSummary lookup : lookups)
 			{
+				if (BypassHandler.isBypassed(lookup.UniqueName))
+				{
+					continue;
+				}
+
 				// Are any of the changed fields used by this lookup?
 				Set<String> lookupFields = fieldsInvolvedInLookup.get(lookup.Id);
 				for (String lookupField :lookupFields) {
@@ -910,6 +976,12 @@ global with sharing class RollupService
 		Map<Id, SObject> recordsToProcess = existingRecords.isEmpty() ? newRecords : existingRecords;
 		for(SObject childRecord : recordsToProcess.values()) {
 			for(RollupSummary lookup : lookups) {
+
+				if (BypassHandler.isBypassed(lookup.UniqueName))
+				{
+					continue;
+				}
+
 				// Does this rollup apply to this child record?
 				if(lookup.ChildObject.equalsIgnoreCase(sObjectDescribe.getName())) {
 					if(childRecord.get(lookup.RelationShipField)!=null) {
@@ -944,9 +1016,13 @@ global with sharing class RollupService
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
         List<RollupSummary> runnowLookups = new List<RollupSummary>();
         List<LookupRollupSummaryScheduleItems__c> scheduledItems = new List<LookupRollupSummaryScheduleItems__c>();
-        List<LookupRollupSummaryScheduleItems__c> scheduledItemsForMDTs = new List<LookupRollupSummaryScheduleItems__c>();
         for(RollupSummary lookup : lookups)
         {
+			if (BypassHandler.isBypassed(lookup.UniqueName))
+			{
+				continue;
+			}
+
             if(lookup.CalculationMode == RollupSummaries.CalculationMode.Scheduled.name() || scheduleAllRollups)
             {
             	// For polymoprhic relationships the master Id list maybe mixed types, associated with the correct rollup
@@ -963,9 +1039,6 @@ global with sharing class RollupService
 	                    scheduledItem.ParentId__c = parentId;
 	                    scheduledItem.QualifiedParentID__c = parentId + '#' + lookup.Id;
 	                    scheduledItems.add(scheduledItem);
-	                    if(lookup.Record instanceof LookupRollupSummary2__mdt) {
-	                 		scheduledItemsForMDTs.add(scheduledItem);
-	                    }
 	                }
                 }
             }
@@ -975,10 +1048,45 @@ global with sharing class RollupService
                 // Filter realtime & Developer lookups in order to generate LRE contexts below
                 runnowLookups.add(lookup);
             }
-        }
-
-        // Add parent Id's to schedule items object
-        upsert scheduledItems QualifiedParentID__c;
+		}
+		
+		if(scheduledItems.size()>0) {
+			// Attempt to populate the legacy LookupRollupSummary__c field (since its a required field) if the admin has not deleted it post install?
+			Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.LookupRollupSummaryScheduleItems__c.fields.getMap();
+			Schema.SObjectField legacyLookupRollupSummaryField = fieldMap.get('dlrs__LookupRollupSummary__c');
+			if(legacyLookupRollupSummaryField!=null) {
+				// Scan for existing shadow rollup records for the custom metadata based rollups
+				Set<String> uniqueNames = new Set<String>();
+				for(LookupRollupSummaryScheduleItems__c scheduledItem : scheduledItems) {
+					Id rollupId = (Id) scheduledItem.LookupRollupSummary2__c;
+					if(rollupId.getSobjectType() == LookupRollupSummary2__mdt.getSObjectType()) {
+						uniqueNames.add('mdt:' + scheduledItem.LookupRollupSummary2__c);
+					}
+				}
+				Map<String, RollupSummary> shadowRollupsByMdtId = new Map<String, RollupSummary>();
+				for(RollupSummary shadowRollup : new RollupSummariesSelector.CustomObjectSelector(false).selectByUniqueName(uniqueNames)) {
+					String uniqueName = shadowRollup.UniqueName;
+					String mdtRollupId = uniqueName.split(':')[1];
+					shadowRollupsByMdtId.put(mdtRollupId, shadowRollup);
+				}				
+				// Populate the legacy LookupRollupSummary__c if possible
+				for(LookupRollupSummaryScheduleItems__c scheduledItem : scheduledItems) {
+					Id rollupId = (Id) scheduledItem.LookupRollupSummary2__c;
+					if(rollupId.getSobjectType() == LookupRollupSummary__c.getSObjectType()) {
+						scheduledItem.put(legacyLookupRollupSummaryField, rollupId);
+					} else if(rollupId.getSobjectType() == LookupRollupSummary2__mdt.getSObjectType()) {
+						RollupSummary shadowRollup = shadowRollupsByMdtId.get(rollupId);
+						if(shadowRollup!=null) {
+							scheduledItem.put(legacyLookupRollupSummaryField, shadowRollup.Id);
+						} else {
+							throw new RollupService.RollupValidationException('Scheduled rollups are running in legacy mode and are unable to resolve corresponding shadow rollups. Please visit the Lookup Rollup Summary Tools tab for more information and steps to resolve.');
+						}
+					}
+				}
+			}
+			// These records drive the work done by the RollupJob Scheduled Apex Class
+			upsert scheduledItems QualifiedParentID__c;
+		}
 
 		// Process each context (parent child relationship) and its associated rollups
 		Map<Id, SObject> masterRecords = new Map<Id, SObject>();
@@ -1021,7 +1129,7 @@ global with sharing class RollupService
 		// Query applicable lookup definitions
 		Set<String> childNames = new Set<String>();
 		for(SObjectType sobjectType : childObjectTypes) {
-			childNames.add( sobjectType.getDescribe().getName());
+			childNames.add(sobjectType.getDescribe().getName());
 		}
 		List<RollupSummary> lookups =
 			new RollupSummariesSelector(false).selectActiveByChildObject(

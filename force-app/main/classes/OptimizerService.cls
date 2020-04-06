@@ -126,11 +126,35 @@ global with sharing class OptimizerService {
      **/
     public class LookupRollupSummaryLogsExist extends OptimizationCheckRunner {
         public override Notification execute() {
-            Notification notification = new Notification();
-            notification.Id = NotificationReference.LookupRollupSummaryLogsExist;
-            notification.Status = NotificationStatus.Warning;
-            notification.Message = 'Check the Lookup Rollup Summary Log tab for errors updating rollups.';
-            return notification;
+            List<LookupRollupSummaryLog__c> logs = [select Id from LookupRollupSummaryLog__c limit 1];
+            if(logs.size()>0) {
+                Notification notification = new Notification();
+                notification.Id = NotificationReference.LookupRollupSummaryLogsExist;
+                notification.Status = NotificationStatus.Warning;
+                notification.Message = 'Check the Lookup Rollup Summary Log tab for errors updating rollups.';
+                notification.MoreInfoURL = 'https://github.com/afawcett/declarative-lookup-rollup-summaries/wiki/Warning:-Lookup-Rollup-Summary-Logs-Exist';
+                return notification;    
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Notifies the user if they have to perform the post install step to clean out the unused field on LookupRollupSummaryScheduleItems__c
+     */
+    public class LookupRollupSummaryScheduleItemsFieldDeletion extends OptimizationCheckRunner {
+        public override Notification execute() {
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.LookupRollupSummaryScheduleItems__c.fields.getMap();
+            Schema.SObjectField legacyLookupRollupSummaryField = fieldMap.get('dlrs__LookupRollupSummary__c');        
+            if(legacyLookupRollupSummaryField!=null) {
+                Notification notification = new Notification();
+                notification.Id = NotificationReference.LookupRollupSummaryScheduleItemsFieldDeletion;
+                notification.Status = NotificationStatus.Attention;
+                notification.Message = 'This version of the tool no longer requires the field dlrs__LookupRollupSummary__c on dlrs__LookupRollupSummaryScheduleItems__c. For optimum configuration and performance please delete it after reading the further information provided.';
+                notification.MoreInfoURL = 'https://github.com/afawcett/declarative-lookup-rollup-summaries/wiki/Attention:-Need-to-delete-unused-field-on-dlrs__LookupRollupSummaryScheduleItems__c';
+                return notification; 
+            }
+            return null;
         }
     }
 

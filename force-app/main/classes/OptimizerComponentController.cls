@@ -45,13 +45,13 @@ public with sharing class OptimizerComponentController {
             new Map<OptimizerService.SummaryStatus, String> {
                 OptimizerService.SummaryStatus.Complete => 'Status: Good',
                 OptimizerService.SummaryStatus.CompleteWithWarnings => 'Status: Warnings',
-                OptimizerService.SummaryStatus.CompleteNeedsAttention => 'Status: Errors'
+                OptimizerService.SummaryStatus.CompleteNeedsAttention => 'Status: Take Action'
              };
     private static Map<OptimizerService.SummaryStatus, String> mapSummaryStatusToUIMessage = 
             new Map<OptimizerService.SummaryStatus, String> {
                 OptimizerService.SummaryStatus.Complete => 'It looks like you are all good for the moment, check back again regularly!',
                 OptimizerService.SummaryStatus.CompleteWithWarnings => 'It looks like you have some warnings to review.',
-                OptimizerService.SummaryStatus.CompleteNeedsAttention => 'It looks like you have some errors to review.'
+                OptimizerService.SummaryStatus.CompleteNeedsAttention => 'It looks like you have some actions to review.'
              };
 
     @AuraEnabled
@@ -69,6 +69,7 @@ public with sharing class OptimizerComponentController {
                 responseNotification.id = notification.Id.name();
                 responseNotification.severity = mapNotificationStatusToUIServerity.get(notification.Status);
                 responseNotification.message = notification.Message;
+                responseNotification.moreInfoUrl = notification.MoreInfoURL;
                 responseSummary.notifications.add(responseNotification);
             }
             return responseSummary;
@@ -96,5 +97,7 @@ public with sharing class OptimizerComponentController {
         public String severity;
         @AuraEnabled
         public String message;
+        @AuraEnabled
+        public string moreInfoURL; 
     }
 }
